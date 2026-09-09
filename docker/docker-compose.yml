@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # FastAPI Deep Learning & Geospatial Backend
+  cyclone-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: cyclone_prediction_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=redis-cache
+      - REDIS_PORT=6379
+      - TRITON_SERVER_URL=triton-inference:8001
+      - API_PORT=8000
+    depends_on:
+      - redis-cache
+    networks:
+      - cyclone-net
+
+  # Redis for Distributed Rate Limiting & Real-time Caching
+  redis-cache:
+    image: redis:7.2-alpine
+    container_name: cyclone_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - cyclone-net
+
+  # NVIDIA Triton High-Performance Inference Server (Optional GPU)
+  triton-inference:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.triton
+    container_name: cyclone_triton_server
+    restart: unless-stopped
+    ports:
+      - "8001:8001" # gRPC
+      - "8002:8002" # Metrics
+    volumes:
+      - ../triton_model_repository:/models
+    networks:
+      - cyclone-net
+
+networks:
+  cyclone-net:
+    driver: bridge

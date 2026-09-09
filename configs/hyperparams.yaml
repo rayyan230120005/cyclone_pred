@@ -1,0 +1,73 @@
+# Tropical Cyclone Prediction System - Hyperparameters & Architecture Settings
+
+project:
+  name: "tropical_cyclone_prediction"
+  version: "1.0.0"
+  seed: 42
+
+models:
+  # YOLOv8 Cyclone Eye & Storm Core Detector
+  identification:
+    backbone: "yolov8m"
+    input_size: [3, 640, 640]
+    num_classes: 2  # 0: cyclone_eye, 1: convective_band
+    confidence_threshold: 0.35
+    iou_threshold: 0.45
+    pretrained: true
+
+  # ResNet-50 + Dense Multimodal Fusion (Intensity & Pressure)
+  classification_fusion:
+    satellite_branch:
+      backbone: "resnet50"
+      pretrained: true
+      input_channels: 4  # [IR_10.8, WV_6.7, VIS_0.65, TIR2_12.0]
+      image_size: [256, 256]
+      feature_dim: 512
+      freeze_early_layers: true
+    meteorological_branch:
+      input_features: 8  # [SST, vertical_wind_shear, vorticity_850, rh_700, mslp, u_wind, v_wind, d_sst_dt]
+      hidden_dims: [128, 64]
+      feature_dim: 64
+      dropout: 0.3
+    fusion_head:
+      fusion_type: "cross_attention"  # "cross_attention" or "concatenation"
+      hidden_dim: 256
+      num_intensity_classes: 7  # D, DD, CS, SCS, VSCS, ESCS, SuCS
+      auxiliary_regression: true # predict MSW (knots) and Central Pressure (hPa)
+      dropout: 0.2
+
+  # ConvLSTM Spatiotemporal Trajectory Tracker
+  spatiotemporal_convlstm:
+    input_sequence_length: 8   # 8 historical frames (24 hours at 3h intervals)
+    forecast_steps: 8          # 8 forecast frames (24 to 48 hours at 3h intervals)
+    channels: 4                # Image channels
+    hidden_dims: [64, 64, 32]
+    kernel_size: [3, 3]
+    spatial_size: [128, 128]
+    return_uncertainty_cone: true
+
+training:
+  batch_size: 32
+  num_workers: 4
+  epochs: 60
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  lr_scheduler: "CosineAnnealingLR"
+  min_lr: 0.000001
+  warmup_epochs: 5
+  gradient_clip_norm: 1.0
+  mixed_precision: true
+  early_stopping_patience: 10
+
+loss_weights:
+  classification_focal: 1.0
+  msw_mae: 0.5
+  pressure_mae: 0.3
+  trajectory_haversine: 1.5
+  uncertainty_nll: 0.2
+
+inference:
+  onnx_opset_version: 17
+  device: "cuda" # fallback to cpu
+  batch_size: 1
+  enable_tensorrt: true

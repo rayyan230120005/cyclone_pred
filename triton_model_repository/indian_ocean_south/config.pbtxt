@@ -1,0 +1,50 @@
+name: "indian_ocean_south"
+platform: "onnxruntime_onnx"
+max_batch_size: 16
+
+input [
+  {
+    name: "satellite_image"
+    data_type: TYPE_FP32
+    dims: [ 4, 256, 256 ]
+  },
+  {
+    name: "synoptic_vector"
+    data_type: TYPE_FP32
+    dims: [ 8 ]
+  }
+]
+
+output [
+  {
+    name: "intensity_logits"
+    data_type: TYPE_FP32
+    dims: [ 7 ]
+  },
+  {
+    name: "wind_speed_kts"
+    data_type: TYPE_FP32
+    dims: [ 1 ]
+  },
+  {
+    name: "central_pressure_hpa"
+    data_type: TYPE_FP32
+    dims: [ 1 ]
+  },
+  {
+    name: "rmw_km"
+    data_type: TYPE_FP32
+    dims: [ 1 ]
+  }
+]
+
+instance_group [
+  {
+    count: 1
+    kind: KIND_GPU
+  }
+]
+
+dynamic_batching {
+  max_queue_delay_microseconds: 5000
+}

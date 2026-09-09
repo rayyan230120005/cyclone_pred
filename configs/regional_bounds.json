@@ -1,0 +1,140 @@
+{
+  "basins": {
+    "bay_of_bengal": {
+      "id": "BOB",
+      "name": "Bay of Bengal & North Andaman Sea",
+      "bounds": {
+        "min_lat": 5.0,
+        "max_lat": 26.0,
+        "min_lon": 80.0,
+        "max_lon": 100.0
+      },
+      "center": {
+        "lat": 15.0,
+        "lon": 89.0
+      },
+      "characteristics": {
+        "peak_season": ["April-May", "October-December"],
+        "mean_sst_celsius": 29.5,
+        "salinity_psu": 32.0,
+        "primary_threat_coasts": ["Odisha", "Andhra Pradesh", "West Bengal", "Bangladesh", "Myanmar"],
+        "model_engine": "bay_of_bengal"
+      }
+    },
+    "arabian_sea": {
+      "id": "ARB",
+      "name": "Arabian Sea & Gulf of Oman",
+      "bounds": {
+        "min_lat": 5.0,
+        "max_lat": 26.0,
+        "min_lon": 50.0,
+        "max_lon": 79.99
+      },
+      "center": {
+        "lat": 15.0,
+        "lon": 65.0
+      },
+      "characteristics": {
+        "peak_season": ["May-June", "October-November"],
+        "mean_sst_celsius": 28.2,
+        "salinity_psu": 36.5,
+        "primary_threat_coasts": ["Gujarat", "Maharashtra", "Goa", "Oman", "Yemen", "Pakistan"],
+        "model_engine": "arabian_sea"
+      }
+    },
+    "indian_ocean_south": {
+      "id": "SIO",
+      "name": "South Indian Ocean Basin",
+      "bounds": {
+        "min_lat": -35.0,
+        "max_lat": 0.0,
+        "min_lon": 30.0,
+        "max_lon": 120.0
+      },
+      "center": {
+        "lat": -17.5,
+        "lon": 75.0
+      },
+      "characteristics": {
+        "peak_season": ["November-April"],
+        "mean_sst_celsius": 27.8,
+        "salinity_psu": 35.0,
+        "primary_threat_coasts": ["Madagascar", "Mauritius", "Reunion", "Mozambique", "Western Australia"],
+        "model_engine": "indian_ocean_south"
+      }
+    }
+  },
+  "default_fallback_basin": "bay_of_bengal",
+  "imd_categories": [
+    {
+      "code": "D",
+      "name": "Depression",
+      "min_wind_kts": 17,
+      "max_wind_kts": 27,
+      "min_wind_kmph": 31,
+      "max_wind_kmph": 49,
+      "color": "#38bdf8",
+      "pressure_drop_hpa": "1.5 - 3.0"
+    },
+    {
+      "code": "DD",
+      "name": "Deep Depression",
+      "min_wind_kts": 28,
+      "max_wind_kts": 33,
+      "min_wind_kmph": 50,
+      "max_wind_kmph": 61,
+      "color": "#0284c7",
+      "pressure_drop_hpa": "3.0 - 4.5"
+    },
+    {
+      "code": "CS",
+      "name": "Cyclonic Storm",
+      "min_wind_kts": 34,
+      "max_wind_kts": 47,
+      "min_wind_kmph": 62,
+      "max_wind_kmph": 88,
+      "color": "#eab308",
+      "pressure_drop_hpa": "4.5 - 8.5"
+    },
+    {
+      "code": "SCS",
+      "name": "Severe Cyclonic Storm",
+      "min_wind_kts": 48,
+      "max_wind_kts": 63,
+      "min_wind_kmph": 89,
+      "max_wind_kmph": 117,
+      "color": "#f97316",
+      "pressure_drop_hpa": "8.5 - 15.5"
+    },
+    {
+      "code": "VSCS",
+      "name": "Very Severe Cyclonic Storm",
+      "min_wind_kts": 64,
+      "max_wind_kts": 89,
+      "min_wind_kmph": 118,
+      "max_wind_kmph": 166,
+      "color": "#ef4444",
+      "pressure_drop_hpa": "15.5 - 31.5"
+    },
+    {
+      "code": "ESCS",
+      "name": "Extremely Severe Cyclonic Storm",
+      "min_wind_kts": 90,
+      "max_wind_kts": 119,
+      "min_wind_kmph": 167,
+      "max_wind_kmph": 221,
+      "color": "#a855f7",
+      "pressure_drop_hpa": "31.5 - 65.5"
+    },
+    {
+      "code": "SuCS",
+      "name": "Super Cyclonic Storm",
+      "min_wind_kts": 120,
+      "max_wind_kts": 250,
+      "min_wind_kmph": 222,
+      "max_wind_kmph": 450,
+      "color": "#ec4899",
+      "pressure_drop_hpa": ">= 65.6"
+    }
+  ]
+}
