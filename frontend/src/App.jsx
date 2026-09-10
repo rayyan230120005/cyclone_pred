@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, Activity, Satellite, Layers, Radio, Sparkles } from 'lucide-react';
 import MapView from './components/MapView';
 import Gauges from './components/Gauges';
 import IntensityChart from './components/IntensityChart';
@@ -139,8 +138,8 @@ export default function App() {
       <header className="glass-panel px-5 py-3.5 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-rose-500 p-0.5 shadow-[0_0_20px_rgba(56,189,248,0.4)]">
-            <div className="w-full h-full bg-[#070b14] rounded-[10px] flex items-center justify-center">
-              <Radio className="w-5 h-5 text-cyan-400 animate-pulse" />
+            <div className="w-full h-full bg-[#070b14] rounded-[10px] flex items-center justify-center text-cyan-400 font-bold">
+              AI
             </div>
           </div>
           <div>
@@ -160,24 +159,24 @@ export default function App() {
         <div className="flex items-center gap-3 text-xs">
           <button
             onClick={() => setActiveLayers((prev) => ({ ...prev, uncertaintyCone: !prev.uncertaintyCone }))}
-            className={`px-3 py-1.5 rounded-lg border flex items-center gap-1.5 transition-all ${
+            className={`px-3 py-1.5 rounded-lg border transition-all ${
               activeLayers.uncertaintyCone
                 ? 'bg-rose-500/20 border-rose-500 text-rose-300'
                 : 'bg-slate-900 border-slate-700 text-slate-400'
             }`}
           >
-            <Layers className="w-3.5 h-3.5" /> Uncertainty Cone
+            Uncertainty Cone
           </button>
 
           <button
             onClick={() => setActiveLayers((prev) => ({ ...prev, satellite: !prev.satellite }))}
-            className={`px-3 py-1.5 rounded-lg border flex items-center gap-1.5 transition-all ${
+            className={`px-3 py-1.5 rounded-lg border transition-all ${
               activeLayers.satellite
                 ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300'
                 : 'bg-slate-900 border-slate-700 text-slate-400'
             }`}
           >
-            <Satellite className="w-3.5 h-3.5" /> Satellite GIBS
+            Satellite GIBS
           </button>
         </div>
       </header>

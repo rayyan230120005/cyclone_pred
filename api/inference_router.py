@@ -10,9 +10,10 @@ from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 import torch
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, File, Form
 
 from src.models.model_dispatcher import ModelDispatcher
+from .alerts_whatsapp import broadcast_alert_for_prediction
 from src.data_pipeline.fetch_mosdac_insat import MosdacInsatFetcher
 from src.data_pipeline.fetch_copernicus_era5 import CopernicusEra5Fetcher
 from src.data_pipeline.fetch_openmeteo import OpenMeteoFetcher
@@ -134,6 +135,7 @@ async def get_live_storms():
 @router.post("/full-pipeline", response_model=FullPipelineResponse)
 async def run_cyclone_prediction(
     req: InferenceRequest,
+    background_tasks: BackgroundTasks,
     _rate_limit: bool = Depends(RateLimiter(requests_per_minute=60)),
     dispatcher: ModelDispatcher = Depends(get_dispatcher),
 ):
@@ -195,7 +197,7 @@ async def run_cyclone_prediction(
 
     storm_id = f"CYC_{int(datetime.datetime.now().timestamp())}_{result['basin']['id']}"
 
-    return {
+    response_payload = {
         "storm_id": storm_id,
         "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "ocean_basin": result["basin"],
@@ -205,3 +207,10 @@ async def run_cyclone_prediction(
         "gis_layers": gis_payload,
         "synoptic_environment": syn_dict,
     }
+
+    # Fire-and-forget: alert any WhatsApp subscribers within range of this
+    # storm. Runs after the response is sent, and failures here never affect
+    # the prediction response itself.
+    background_tasks.add_task(broadcast_alert_for_prediction, response_payload)
+
+    return response_payload

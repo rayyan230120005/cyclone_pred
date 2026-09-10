@@ -1,27 +1,5 @@
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, Circle, useMap } from 'react-leaflet';
-import L from 'leaflet';
-
-// Fix default leaflet icon paths
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
-
-// Create custom cyclone eye marker
-const cycloneIcon = L.divIcon({
-  className: 'custom-cyclone-marker',
-  html: `
-    <div style="position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-      <div style="position: absolute; width: 32px; height: 32px; background: rgba(244,63,94,0.3); border-radius: 50%; animation: pulse-glow 1.8s infinite;"></div>
-      <div style="width: 16px; height: 16px; background: #f43f5e; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 10px #f43f5e;"></div>
-    </div>
-  `,
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
-});
 
 // Helper component to center map dynamically
 function MapCenterController({ center }) {
@@ -61,10 +39,10 @@ export default function MapView({ predictionData, center, activeLayers }) {
       >
         <MapCenterController center={mapCenter} />
 
-        {/* Dark Matter CartoDB Base Layer */}
+        {/* OpenStreetMap base layer with no API key required */}
         <TileLayer
-          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
         {/* Optional NASA GIBS Real-Time Satellite Layer */}
@@ -145,7 +123,7 @@ export default function MapView({ predictionData, center, activeLayers }) {
 
         {/* Active Cyclone Eye Marker */}
         {eye && (
-          <Marker position={[eye.latitude, eye.longitude]} icon={cycloneIcon}>
+          <Marker position={[eye.latitude, eye.longitude]}>
             <Popup>
               <div className="text-slate-900 font-sans p-1">
                 <div className="font-bold text-sm text-cyan-600">Active Cyclone Center</div>

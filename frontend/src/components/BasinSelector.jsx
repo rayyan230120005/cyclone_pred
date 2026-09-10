@@ -1,5 +1,4 @@
 import React from 'react';
-import { Globe2, Sliders, RefreshCw } from 'lucide-react';
 
 export default function BasinSelector({
   activeBasin,
@@ -25,7 +24,7 @@ export default function BasinSelector({
     <div className="glass-panel p-4 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Globe2 className="w-4 h-4 text-cyan-400" />
+          <span className="text-cyan-400 text-sm">◉</span>
           <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
             Ocean Basin Routing & Parameters
           </span>
@@ -121,9 +120,8 @@ export default function BasinSelector({
       <button
         onClick={onTriggerInference}
         disabled={isLoading}
-        className="btn-primary w-full py-2.5 flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+        className="btn-primary w-full py-2.5 text-sm disabled:opacity-50"
       >
-        <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
         <span>{isLoading ? 'Synthesizing & Inferencing...' : 'Execute Multimodal Forecast'}</span>
       </button>
     </div>

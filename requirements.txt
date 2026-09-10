@@ -46,6 +46,9 @@ seaborn>=0.13.0
 pyyaml>=6.0.1
 python-dotenv>=1.0.0
 
+# WhatsApp Alerting
+twilio>=8.10.0
+
 # Triton Client
 tritonclient[all]>=2.40.0
 

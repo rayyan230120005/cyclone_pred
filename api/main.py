@@ -14,11 +14,15 @@ import logging
 from typing import Set
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
+load_dotenv()  # Loads TWILIO_* / REDIS_* / WHATSAPP_* vars from a local .env if present
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .inference_router import router as inference_router
+from .whatsapp_router import router as whatsapp_router
 from src.training.export_onnx import export_all_regional_models
 
 logging.basicConfig(
@@ -63,6 +67,7 @@ app.add_middleware(
 
 # Register routers
 app.include_router(inference_router)
+app.include_router(whatsapp_router)
 
 
 # ==========================================
@@ -135,6 +140,8 @@ async def root():
             "live_storms": "/api/v1/live-storms",
             "full_prediction_pipeline": "/api/v1/full-pipeline (POST)",
             "websocket_telemetry": "/ws/telemetry",
+            "whatsapp_webhook": "/api/v1/whatsapp/webhook (POST, Twilio inbound)",
+            "whatsapp_subscriber_count": "/api/v1/whatsapp/subscribers/count",
         },
     }
 

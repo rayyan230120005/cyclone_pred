@@ -1,4 +1,4 @@
-# Tropical Cyclone AI Prediction & Geospatial Tracking System
+# 🌪️ Tropical Cyclone AI Prediction & Geospatial Tracking System
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.1+-EE4C2C.svg?logo=pytorch)](https://pytorch.org)
@@ -10,7 +10,7 @@ An end-to-end, multimodal deep learning and operational meteorological tracking 
 
 ---
 
-## System Architecture
+##  System Architecture
 
 ```mermaid
 graph TD
@@ -39,7 +39,7 @@ graph TD
 
 ---
 
-##  Repository Structure
+## Repository Structure
 
 ```
 tropical_cyclone_project/
@@ -119,7 +119,7 @@ tropical_cyclone_project/
 
 ---
 
-## IMD Intensity Classification Scale
+##  IMD Intensity Classification Scale
 
 The platform adheres directly to the official Indian Meteorological Department (IMD) cyclone categorization:
 
@@ -135,7 +135,7 @@ The platform adheres directly to the official Indian Meteorological Department (
 
 ---
 
-## Quickstart Guide
+##  Quickstart Guide
 
 ### 1. Installation
 
@@ -177,6 +177,26 @@ Dashboard will open at [http://localhost:3000](http://localhost:3000).
 
 ---
 
+## WhatsApp Cyclone Alerts
+
+Subscribers opt in directly through WhatsApp (no app or account needed), similar to public-safety broadcast bots like RBI's cybercrime alerts, and are automatically messaged whenever a cyclone is detected near their shared location.
+
+**How it works:**
+1. A user messages your Twilio WhatsApp number (e.g. "Hi").
+2. The bot asks them to share their location once, using WhatsApp's native location-share.
+3. Whenever `/api/v1/full-pipeline` detects a storm at or above a configurable IMD category (default: Cyclonic Storm and above), everyone within `WHATSAPP_ALERT_RADIUS_KM` (default 300 km) of the storm's center is sent a WhatsApp alert with intensity, distance, and a safety note. Repeat alerts for the same storm are throttled per subscriber (`WHATSAPP_ALERT_COOLDOWN_SECONDS`).
+4. Users can reply `STOP` anytime to unsubscribe.
+
+**Setup:**
+1. Create a free [Twilio](https://www.twilio.com/whatsapp) account and enable the WhatsApp Sandbox (or a production sender once approved).
+2. Copy `.env.example` to `.env` and fill in `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`.
+3. In the Twilio Console, point the Sandbox/Sender's inbound webhook to `https://<your-api-host>/api/v1/whatsapp/webhook` (POST). For local testing, expose your backend with a tunnel (e.g. `ngrok http 8000`) and use the ngrok URL.
+4. Without Twilio credentials set, the service runs in **dry-run mode** — alerts are logged instead of sent, so everything else keeps working during development.
+
+Check subscriber counts anytime at `GET /api/v1/whatsapp/subscribers/count`.
+
+---
+
 ##  Docker Deployment
 
 To launch the complete distributed stack (FastAPI Backend + Redis + Triton Inference Server):
@@ -188,7 +208,7 @@ docker-compose up --build
 
 ---
 
-##  Benchmark Evaluation
+## Benchmark Evaluation
 
 To execute benchmark validation across historical ground-truth storms (e.g., Cyclone Amphan, Fani, Tauktae, Biparjoy, Freddy):
 
@@ -204,5 +224,5 @@ Sample output:
 
 ---
 
-## 📜License
+## License
 MIT License. Built for advanced atmospheric intelligence, early warning dissemination, and disaster risk reduction.

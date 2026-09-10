@@ -1,5 +1,4 @@
 import React from 'react';
-import { Radio, Activity, Sparkles, Navigation } from 'lucide-react';
 
 export default function LiveFeed({ activeStorms, onSelectStorm, selectedStormId, isWsConnected }) {
   return (
@@ -7,7 +6,7 @@ export default function LiveFeed({ activeStorms, onSelectStorm, selectedStormId,
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Activity className="w-4 h-4 text-cyan-400" />
+          <span className="text-cyan-400 text-sm">◉</span>
           <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
             Active Ocean Telemetry & Storms
           </span>
@@ -36,8 +35,7 @@ export default function LiveFeed({ activeStorms, onSelectStorm, selectedStormId,
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-sm text-white flex items-center gap-1.5 truncate">
-                    <Radio className={`w-3.5 h-3.5 ${isSelected ? 'text-cyan-400' : 'text-slate-500'}`} />
+                  <span className="font-semibold text-sm text-white truncate">
                     {storm.name}
                   </span>
                   <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">
@@ -51,8 +49,7 @@ export default function LiveFeed({ activeStorms, onSelectStorm, selectedStormId,
                 </div>
 
                 {lastTrack && (
-                  <div className="flex items-center gap-1 text-[10px] text-slate-500">
-                    <Navigation className="w-3 h-3 text-slate-500" />
+                  <div className="text-[10px] text-slate-500">
                     <span>Eye at {lastTrack.lat}°N, {lastTrack.lon}°E</span>
                   </div>
                 )}

@@ -1,5 +1,4 @@
 import React from 'react';
-import { TrendingUp, BarChart3, AlertCircle } from 'lucide-react';
 
 const IMD_PALETTE = {
   D: '#38bdf8',
@@ -29,7 +28,7 @@ export default function IntensityChart({ intensityData, forecastData }) {
       {/* Probability Distribution */}
       <div>
         <div className="flex items-center justify-between text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-          <span className="flex items-center gap-1.5"><BarChart3 className="w-4 h-4 text-cyan-400" /> IMD Category Probabilities</span>
+          <span>IMD Category Probabilities</span>
           <span className="text-slate-400">Softmax Confidence</span>
         </div>
         
@@ -64,7 +63,7 @@ export default function IntensityChart({ intensityData, forecastData }) {
       {/* Spatiotemporal Track Forecast Timeline */}
       <div>
         <div className="flex items-center justify-between text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2.5">
-          <span className="flex items-center gap-1.5"><TrendingUp className="w-4 h-4 text-rose-400" /> 48-Hour Spatiotemporal Trajectory</span>
+          <span>48-Hour Spatiotemporal Trajectory</span>
           <span className="text-slate-400 text-[11px]">ConvLSTM Sequence Model</span>
         </div>
 

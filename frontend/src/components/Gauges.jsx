@@ -1,5 +1,4 @@
 import React from 'react';
-import { Wind, Compass, Gauge, Thermometer, ShieldAlert, Waves } from 'lucide-react';
 
 const CATEGORY_COLORS = {
   D: { bg: 'bg-sky-400', text: 'text-black', name: 'Depression', border: 'border-sky-400' },
@@ -25,7 +24,7 @@ export default function Gauges({ intensityData, eyeData, synopticData }) {
       {/* 1. IMD Classification Card */}
       <div className={`glass-panel p-4 flex flex-col justify-between border-l-4 ${catStyle.border}`}>
         <div className="flex items-center justify-between text-slate-400 text-xs uppercase font-semibold tracking-wider">
-          <span className="flex items-center gap-1.5"><ShieldAlert className="w-4 h-4 text-rose-400" /> IMD Classification</span>
+          <span>IMD Classification</span>
           <span className="text-cyan-400">{confidence}% Conf</span>
         </div>
         <div className="my-2">
@@ -44,7 +43,7 @@ export default function Gauges({ intensityData, eyeData, synopticData }) {
       {/* 2. Maximum Sustained Wind Card */}
       <div className="glass-panel p-4 flex flex-col justify-between border-l-4 border-cyan-400">
         <div className="flex items-center justify-between text-slate-400 text-xs uppercase font-semibold tracking-wider">
-          <span className="flex items-center gap-1.5"><Wind className="w-4 h-4 text-cyan-400" /> Max Sustained Wind</span>
+          <span>Max Sustained Wind</span>
           <span className="text-cyan-300 hud-font">{windKmph} km/h</span>
         </div>
         <div className="my-1">
@@ -64,7 +63,7 @@ export default function Gauges({ intensityData, eyeData, synopticData }) {
       {/* 3. Central Pressure Card */}
       <div className="glass-panel p-4 flex flex-col justify-between border-l-4 border-purple-400">
         <div className="flex items-center justify-between text-slate-400 text-xs uppercase font-semibold tracking-wider">
-          <span className="flex items-center gap-1.5"><Gauge className="w-4 h-4 text-purple-400" /> Central Pressure</span>
+          <span>Central Pressure</span>
           <span className="text-purple-300">MSLP</span>
         </div>
         <div className="my-1">
@@ -81,7 +80,7 @@ export default function Gauges({ intensityData, eyeData, synopticData }) {
       {/* 4. Atmospheric SST & Shear Card */}
       <div className="glass-panel p-4 flex flex-col justify-between border-l-4 border-emerald-400">
         <div className="flex items-center justify-between text-slate-400 text-xs uppercase font-semibold tracking-wider">
-          <span className="flex items-center gap-1.5"><Thermometer className="w-4 h-4 text-emerald-400" /> Marine Environment</span>
+          <span>Marine Environment</span>
           <span className="text-emerald-300">ERA5 Reanalysis</span>
         </div>
         <div className="grid grid-cols-2 gap-2 my-1">

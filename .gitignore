@@ -62,3 +62,4 @@ configs/api_keys.env
 # OS Specific
 .DS_Store
 Thumbs.db
+data/whatsapp_subscribers.json

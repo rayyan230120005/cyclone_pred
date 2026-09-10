@@ -30,7 +30,6 @@ from src.utils.gis_visualization import IMD_COLORS
 
 st.set_page_config(
     page_title="Tropical Cyclone AI Forecaster",
-    page_icon="🌀",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -82,7 +81,7 @@ cyclones_list = sample_data.get("historical_cyclones", [])
 # ==========================================
 # Sidebar Controls
 # ==========================================
-st.sidebar.title("🌀 Cyclone Intelligence")
+st.sidebar.title("Cyclone Intelligence")
 st.sidebar.caption("Multimodal INSAT-3D + ERA5 Deep Forecasting")
 
 mode = st.sidebar.radio("Operating Mode", ["Historical Case Studies", "Custom Coordinate Inference", "Live Marine Telemetry"])
@@ -116,7 +115,7 @@ rh = st.sidebar.slider("700 hPa Relative Humidity (%)", 40.0, 100.0, 85.0, 1.0)
 # Header & Basin Identification
 # ==========================================
 basin_id, basin_meta = dispatcher.dispatch_basin(lat, lon)
-st.title("🌪️ Tropical Cyclone Multimodal AI Prediction System")
+st.title("Tropical Cyclone Multimodal AI Prediction System")
 st.markdown(f"**Target Basin:** `{basin_meta.get('name', basin_id)}` | **Active Model Engine:** `ONNX_{basin_id.upper()}` | **Coordinates:** `{lat}°N, {lon}°E`")
 
 # ==========================================
@@ -174,7 +173,7 @@ st.divider()
 map_col, chart_col = st.columns([3, 2])
 
 with map_col:
-    st.subheader("🗺️ Spatiotemporal GIS Track & Uncertainty Cone")
+    st.subheader("Spatiotemporal GIS Track & Uncertainty Cone")
     
     # Create Folium Map
     m = folium.Map(location=[lat, lon], zoom_start=6, tiles="CartoDB dark_matter")
@@ -183,7 +182,6 @@ with map_col:
     folium.Marker(
         [eye["latitude"], eye["longitude"]],
         popup=f"<b>Cyclone Center</b><br>Intensity: {cat_code}<br>Wind: {intensity['maximum_sustained_wind_kts']} kts",
-        icon=folium.Icon(color="red", icon="bullseye", prefix="fa"),
     ).add_to(m)
 
     # Plot forecast track
@@ -220,7 +218,7 @@ with map_col:
     st.components.v1.html(m._repr_html_(), height=480)
 
 with chart_col:
-    st.subheader("📈 48-Hour Intensity & Track Projection")
+    st.subheader("48-Hour Intensity & Track Projection")
     
     # Plotly Forecast Curve
     lead_times = [0] + [p["lead_hours"] for p in forecast]
@@ -271,7 +269,7 @@ with chart_col:
 # ==========================================
 # Multichannel Satellite Band Viewer
 # ==========================================
-st.subheader("🛰️ Multi-Spectral Satellite Channels (INSAT-3D/3DR Calibrated Radiance)")
+st.subheader("Multi-Spectral Satellite Channels (INSAT-3D/3DR Calibrated Radiance)")
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
