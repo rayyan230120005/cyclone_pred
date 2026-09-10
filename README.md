@@ -1,4 +1,4 @@
-# 🌪️ Tropical Cyclone AI Prediction & Geospatial Tracking System
+# Tropical Cyclone AI Prediction & Geospatial Tracking System
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.1+-EE4C2C.svg?logo=pytorch)](https://pytorch.org)
@@ -10,7 +10,7 @@ An end-to-end, multimodal deep learning and operational meteorological tracking 
 
 ---
 
-## 🌟 System Architecture
+## System Architecture
 
 ```mermaid
 graph TD
@@ -39,7 +39,7 @@ graph TD
 
 ---
 
-## 📁 Repository Structure
+##  Repository Structure
 
 ```
 tropical_cyclone_project/
@@ -119,7 +119,7 @@ tropical_cyclone_project/
 
 ---
 
-## 🏷️ IMD Intensity Classification Scale
+## IMD Intensity Classification Scale
 
 The platform adheres directly to the official Indian Meteorological Department (IMD) cyclone categorization:
 
@@ -135,7 +135,7 @@ The platform adheres directly to the official Indian Meteorological Department (
 
 ---
 
-## 🚀 Quickstart Guide
+## Quickstart Guide
 
 ### 1. Installation
 
@@ -177,7 +177,7 @@ Dashboard will open at [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## 🐳 Docker Deployment
+##  Docker Deployment
 
 To launch the complete distributed stack (FastAPI Backend + Redis + Triton Inference Server):
 
@@ -188,7 +188,7 @@ docker-compose up --build
 
 ---
 
-## 📊 Benchmark Evaluation
+##  Benchmark Evaluation
 
 To execute benchmark validation across historical ground-truth storms (e.g., Cyclone Amphan, Fani, Tauktae, Biparjoy, Freddy):
 
@@ -204,5 +204,5 @@ Sample output:
 
 ---
 
-## 📜 License
+## 📜License
 MIT License. Built for advanced atmospheric intelligence, early warning dissemination, and disaster risk reduction.
