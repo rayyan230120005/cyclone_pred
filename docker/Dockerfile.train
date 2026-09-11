@@ -1,0 +1,39 @@
+# GPU training image for the regional cyclone models.
+#
+#   docker compose --profile train run --rm trainer
+#
+# Based on NVIDIA's CUDA runtime rather than python:slim so that the CUDA build of
+# PyTorch has the driver libraries it needs. Requires the NVIDIA Container Toolkit
+# on the host.
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.10 \
+    python3-pip \
+    build-essential \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/bin/python3.10 /usr/bin/python
+
+# CUDA wheels must be installed BEFORE requirements.txt, which would otherwise
+# resolve to the CPU-only build of torch and silently train ~30x slower.
+RUN pip install --no-cache-dir \
+    torch torchvision --index-url https://download.pytorch.org/whl/cu121
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY src/ ./src/
+COPY configs/ ./configs/
+
+# data/ and checkpoints/ arrive as bind mounts at run time, not as image layers.
+ENTRYPOINT ["python", "-m", "src.training.train_regional"]
+CMD ["--all-basins", "--device", "cuda"]
