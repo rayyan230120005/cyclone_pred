@@ -59,6 +59,17 @@ configs/api_keys.env
 .env
 .env.local
 
+# Downloaded best-track archives (~105 MB, re-fetch with download_ibtracs.py)
+data/raw/best_track/*.csv
+data/raw/satellite_imagery/**/*.nc
+
+# Training outputs
+checkpoints/
+*_history.json
+
+# Streamlit secrets (holds API tokens)
+.streamlit/secrets.toml
+
 # OS Specific
 .DS_Store
 Thumbs.db

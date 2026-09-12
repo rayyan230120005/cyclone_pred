@@ -1,0 +1,35 @@
+# Build context exclusions. Without these the 100+ MB of IBTrACS CSVs and any
+# downloaded imagery get shipped into every image layer.
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Large data - bind-mounted at run time instead (see docker-compose.yml)
+data/raw/
+data/processed/
+checkpoints/
+*.pth
+*.onnx
+
+# Frontend build artefacts
+frontend/node_modules/
+frontend/dist/
+frontend/.cache/
+
+# Secrets - passed via env_file, never baked into an image
+.env
+.env.local
+configs/api_keys.env
+.streamlit/secrets.toml
+
+# Notebooks, docs, VCS
+notebooks/
+.ipynb_checkpoints/
+.git/
+.github/
+*.log
+.DS_Store
+Thumbs.db
