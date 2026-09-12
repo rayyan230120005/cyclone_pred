@@ -17,10 +17,17 @@ Each emitted sample is one forecast instant `t` within one storm:
     central_pressure   [1]          observed MSLP, hPa
     rmw                [1]          observed radius of max winds, km
     future_trajectory  [8, 4]       observed per-step [dlat, dlon, wind_kts, 0] for +6h..+48h
+    history_motion     [8, 2]       observed per-step [dlat, dlon] for t-7..t
+    last_motion        [2]          the most recent observed 6-hourly [dlat, dlon]
 
 The trajectory target is the highest-value signal here and needs no imagery at all:
 it is the storm's actual observed motion, which is exactly what the ConvLSTM decoder
 is asked to predict.
+
+`history_motion` / `last_motion` are the matching inputs. Past motion is the dominant
+track predictor - pure persistence (continue the current heading) scores 180 km on Bay
+of Bengal validation against 207 km for basin climatology - so a decoder that cannot
+see heading cannot beat a baseline with no parameters at all.
 
 Data tiers (the dataset is honest about what it has):
   - `imagery="hursat"`   real storm-centered satellite imagery; samples without it are dropped
@@ -533,6 +540,9 @@ class RealCycloneDataset(Dataset):
         rmw = torch.tensor([float(curr["rmw_km"])], dtype=torch.float32)
         label = torch.tensor(int(curr["category_idx"]), dtype=torch.long)
 
+        # ---------- past motion (the dominant track predictor) ----------
+        history_motion, last_motion = self._build_history_motion(s)
+
         # ---------- trajectory target (observed future motion) ----------
         future, traj_mask = self._build_future_trajectory(s)
 
@@ -547,6 +557,8 @@ class RealCycloneDataset(Dataset):
             "rmw": rmw,
             "future_trajectory": future,
             "trajectory_mask": traj_mask,
+            "history_motion": history_motion,
+            "last_motion": last_motion,
             "has_imagery": torch.tensor(has_imagery, dtype=torch.float32),
             "pressure_observed": torch.tensor(
                 float(curr.get("pres_observed", 0.0)), dtype=torch.float32
@@ -607,6 +619,41 @@ class RealCycloneDataset(Dataset):
         )
         return image, sequence, 1.0
 
+    def _build_history_motion(self, s: SampleIndex) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        The storm's observed motion over the preceding frames.
+
+        Returns:
+            history_motion [history_steps, 2]  per-step [dlat, dlon], oldest first,
+                                               left-padded with zeros where the storm
+                                               has less history than the window
+            last_motion    [2]                 the most recent 6-hourly [dlat, dlon]
+
+        This is the single most predictive track feature there is: simple persistence
+        (continue the current heading) beats basin climatology by a wide margin. The
+        decoder previously received neither, so it could not represent heading at all
+        and was structurally incapable of beating a persistence baseline.
+        """
+        base = s.row_start + s.pos
+        motion = np.zeros((self.history_steps, 2), dtype=np.float32)
+
+        # Walk backwards over the real history, filling the window from the right.
+        for k in range(1, s.n_history):
+            curr = self.df.iloc[base - k + 1]
+            prev = self.df.iloc[base - k]
+            dlon = float(curr["LON"]) - float(prev["LON"])
+            if dlon > 180.0:
+                dlon -= 360.0
+            elif dlon < -180.0:
+                dlon += 360.0
+            motion[self.history_steps - k] = [
+                float(curr["LAT"]) - float(prev["LAT"]),
+                dlon,
+            ]
+
+        last = motion[-1].copy()
+        return torch.from_numpy(motion), torch.from_numpy(last)
+
     def _build_future_trajectory(self, s: SampleIndex) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Observed per-step motion for +6h..+48h as [dlat, dlon, wind_kts, 0.0],
@@ -651,13 +698,25 @@ class RealCycloneDataset(Dataset):
         counts = self._category_counts()
         return {code: int(counts[i]) for i, code in enumerate(IMD_CLASSES)}
 
-    def class_weights(self) -> torch.Tensor:
+    def class_weights(self, power: float = 0.5, max_weight: float = 8.0) -> torch.Tensor:
         """
-        Inverse-frequency weights for the focal loss. Severe categories are rare;
-        without this the model can score well by never predicting ESCS or SuCS.
+        Class weights for the focal loss. Severe categories are rare; without any
+        weighting the model can score well by never predicting ESCS or SuCS.
+
+        Full inverse frequency is too violent here. Bay of Bengal has 7 SuCS samples
+        against 839 depressions, giving that class a weight of ~45x - so a single
+        SuCS sample in a batch produces a gradient spike 45 times the norm, which is
+        what makes validation accuracy swing between 0.09 and 0.42 epoch to epoch.
+
+        Weights are therefore raised to `power` (0.5 = inverse square root, the usual
+        compromise) and clipped at `max_weight`. Rare classes stay up-weighted; no
+        single class can hijack a batch. Set power=1.0, max_weight=inf to recover the
+        original behaviour.
         """
         counts = np.maximum(self._category_counts(), 1.0)
-        weights = counts.sum() / (len(IMD_CLASSES) * counts)
+        weights = (counts.sum() / (len(IMD_CLASSES) * counts)) ** power
+        weights = np.minimum(weights, max_weight)
+        weights = weights / weights.mean()  # keep the loss scale comparable across basins
         return torch.tensor(weights, dtype=torch.float32)
 
 

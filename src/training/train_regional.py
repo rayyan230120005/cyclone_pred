@@ -192,6 +192,7 @@ class RegionalTrainer:
         imagery_root: Optional[str] = None,
         num_workers: Optional[int] = None,
         max_train_samples: Optional[int] = None,
+        data_parallel: bool = False,
     ):
         self.basin = basin
         self.cfg = config or {}
@@ -252,6 +253,27 @@ class RegionalTrainer:
         ).to(self.device)
         self.convlstm = CycloneTrajectoryConvLSTM(in_channels=4, forecast_steps=8).to(self.device)
 
+        # Optional single-process multi-GPU. DataParallel splits each batch across
+        # cards and gathers the outputs; both models return dicts / plain tensors,
+        # which it handles. Scaling is sub-linear (one process, one optimiser, a
+        # gather every step) but it needs no launcher, which matters in a notebook.
+        # For multi-node or best-case throughput, DDP is the right tool instead.
+        self.data_parallel = bool(data_parallel) and self.device.type == "cuda"
+        if self.data_parallel:
+            n_gpus = torch.cuda.device_count()
+            if n_gpus < 2:
+                logger.warning(f"--data-parallel requested but only {n_gpus} GPU visible; ignoring.")
+                self.data_parallel = False
+            else:
+                if self.batch_size % n_gpus != 0:
+                    logger.warning(
+                        f"batch_size {self.batch_size} is not divisible by {n_gpus} GPUs; "
+                        f"the last shard will be smaller."
+                    )
+                self.classifier = nn.DataParallel(self.classifier)
+                self.convlstm = nn.DataParallel(self.convlstm)
+                logger.info(f"DataParallel enabled across {n_gpus} GPUs.")
+
         # ---------------- losses ----------------
         base_ds = self.train_ds.dataset if isinstance(self.train_ds, torch.utils.data.Subset) else self.train_ds
         weights = base_ds.class_weights().to(self.device)
@@ -273,6 +295,11 @@ class RegionalTrainer:
             f"[{basin}] device={self.device} amp={self.use_amp} pretrained={pretrained} "
             f"train={len(self.train_ds)} val={len(self.val_ds)} imagery={imagery}"
         )
+
+    @staticmethod
+    def _unwrap(model: nn.Module) -> nn.Module:
+        """Returns the underlying module, whether or not DataParallel wrapped it."""
+        return model.module if isinstance(model, nn.DataParallel) else model
 
     @staticmethod
     def _resolve_device(device: str) -> torch.device:
@@ -316,10 +343,17 @@ class RegionalTrainer:
         loss_rmw = masked_l1(out_cls["rmw_km"], t_rmw, rmw_obs, RMW_SCALE_KM)
 
         # Seed the decoder with the storm's current state: [dlat, dlon, wind, log_sigma].
+        #
+        # The first two slots carry the most recently observed 6-hourly motion. They
+        # used to be hardcoded zeros, which left heading completely absent from the
+        # model's inputs - with imagery off the ConvLSTM encoder sees only zeros, so
+        # wind was the sole storm-specific signal reaching the decoder. That made it
+        # structurally unable to beat a persistence baseline, and it didn't: 190 km
+        # against persistence's 180 km on Bay of Bengal validation.
+        last_motion = batch["last_motion"].to(dev, non_blocking=True)  # [B, 2]
         seed = torch.cat(
             [
-                torch.zeros_like(t_wind),
-                torch.zeros_like(t_wind),
+                last_motion,
                 t_wind,
                 torch.full_like(t_wind, math.log(40.0)),
             ],
@@ -434,8 +468,11 @@ class RegionalTrainer:
                 best_epoch = epoch
                 torch.save(
                     {
-                        "classifier_state": self.classifier.state_dict(),
-                        "convlstm_state": self.convlstm.state_dict(),
+                        # Unwrap DataParallel before saving. Leaving the wrapper on
+                        # prefixes every key with "module.", which then fails to load
+                        # into the plain models used at inference and ONNX export.
+                        "classifier_state": self._unwrap(self.classifier).state_dict(),
+                        "convlstm_state": self._unwrap(self.convlstm).state_dict(),
                         "basin": self.basin,
                         "epoch": epoch,
                         "val_metrics": val_metrics,
@@ -496,6 +533,8 @@ def main() -> None:
     parser.add_argument("--num-workers", type=int, default=None)
     parser.add_argument("--max-train-samples", type=int, default=None,
                         help="Cap training samples - use for a fast smoke test")
+    parser.add_argument("--data-parallel", action="store_true",
+                        help="Split each batch across all visible GPUs (e.g. Kaggle T4 x2)")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -520,6 +559,7 @@ def main() -> None:
             imagery_root=args.imagery_root,
             num_workers=args.num_workers,
             max_train_samples=args.max_train_samples,
+            data_parallel=args.data_parallel,
         )
         results.append(trainer.train())
 

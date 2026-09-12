@@ -1,3 +1,17 @@
+/* ---------------------------------------------------------------------------
+ * Tailwind layers.
+ *
+ * `base` and `components` sit above the hand-written rules below; `utilities`
+ * is appended at the very END of this file on purpose. Utility classes and the
+ * custom component classes (.btn-primary, .glass-panel) have identical
+ * specificity, so source order is what decides the winner - and the JSX relies
+ * on utilities overriding the components, e.g.
+ *     className="btn-primary w-full py-2.5"
+ * where py-2.5 must beat .btn-primary's own `padding: 8px 16px`.
+ * ------------------------------------------------------------------------- */
+@tailwind base;
+@tailwind components;
+
 :root {
   --bg-primary: #070b14;
   --bg-secondary: #0d1527;
@@ -110,3 +124,29 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #38bdf8;
 }
+
+
+/* ---------------------------------------------------------------------------
+ * Leaflet compatibility.
+ *
+ * Tailwind's Preflight applies `max-width: 100%; height: auto` to every img.
+ * Leaflet positions tiles as absolutely-placed <img> elements at fixed pixel
+ * sizes, so Preflight collapses them and the basemap renders as slivers or
+ * blank space. Leaflet's own CSS is loaded from a CDN in index.html, i.e.
+ * before this bundle, so it cannot win on order - the reset has to be undone
+ * explicitly here.
+ * ------------------------------------------------------------------------- */
+.leaflet-container img,
+.leaflet-container svg {
+  max-width: none !important;
+  height: auto;
+}
+
+.leaflet-container img.leaflet-tile {
+  /* Tiles must keep the exact dimensions Leaflet computes for them. */
+  width: auto;
+  height: auto;
+}
+
+/* Tailwind utilities last - see the note at the top of this file. */
+@tailwind utilities;
